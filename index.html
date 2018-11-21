@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Visualization of Kickstarter Campaigns</title>
+<style>
+	#treechart {
+		background: #fff;
+		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	}
+
+	.title {
+			font-weight: bold;
+			font-size: 24px;
+			text-align: center;
+			margin-top: 6px;
+			margin-bottom: 6px;
+	}
+	text {
+		pointer-events: none;
+	}
+
+	.grandparent text {
+		font-weight: bold;
+	}
+
+	rect {
+
+		stroke: #fff;
+	}
+
+	rect.parent,
+	.grandparent rect {
+		stroke-width: 2px;
+	}
+
+	rect.parent {
+			pointer-events: none;
+	}
+
+	.grandparent rect {
+		fill: orange;
+	}
+
+	.grandparent:hover rect {
+		fill: #ee9700;
+	}
+
+	.children rect.parent,
+	.grandparent rect {
+		cursor: pointer;
+	}
+
+	.children rect.parent {
+		fill: #bbb;
+		fill-opacity: .5;
+	}
+
+	.children:hover rect.child {
+		fill: #bbb;
+	}
+</style>
+
+</head>
+
+<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+
+<div class="container">
+  <div class="jumbotron">
+    <h1>Visualization of Kickstarter Campaigns</h1>      
+   
+  </div>
+     
+</div>
+
+<body style="margin-left: 50px; margin-top: 20px;">
+
+
+
+<!--Dropdown--> 
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<div  style="float:left">
+
+<div class="slidecontainer">
+	<input  onchange="updateSlider()" style="float:left"type="range" min="2015" max="2018" value="2015" class="slider" id="myRange">
+	<p style="float:left">Year: <span id="demo"></span></p>
+</div>
+<div class="slidecontainer">
+	<input  onchange="updateSlider()" style="float:left" type="range" min="2015" max="2018" value="2018" class="slider2" id="myRange2">
+	<p style="float:left">Year: <span id="demo2"></span></p>
+</div>
+<div style="clear:both"></div>
+<script>
+
+	function updateSlider(){
+		var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+g_year_min = slider.value;
+
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+var slider2 = document.getElementById("myRange2");
+var output2 = document.getElementById("demo2");
+output2.innerHTML = slider2.value;
+g_year_max = slider2.value;
+slider2.oninput = function() {
+  output2.innerHTML = this.value;
+}
+update_bar()
+	}
+
+var g_year_min
+var g_year_max 
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = slider.value;
+g_year_min = slider.value;
+slider.oninput = function() {
+  output.innerHTML = this.value;
+}
+var slider2 = document.getElementById("myRange2");
+var output2 = document.getElementById("demo2");
+output2.innerHTML = slider2.value;
+g_year_max = slider2.value;
+slider2.oninput = function() {
+  output2.innerHTML = this.value;
+}
+</script>
+
+<div class="dropdown">
+	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		State
+	</button>
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a class="dropdown-item" onclick="filter_state('')">All</a>
+<a class="dropdown-item" onclick="filter_state('Missouri')">Missouri</a>
+<a class="dropdown-item" onclick="filter_state('California')">California</a>
+<a class="dropdown-item" onclick="filter_state('Oregon')">Oregon</a>
+<a class="dropdown-item" onclick="filter_state('Illinois')">Illinois</a>
+<a class="dropdown-item" onclick="filter_state('Idaho')">Idaho</a>
+<a class="dropdown-item" onclick="filter_state('Florida')">Florida</a>
+<a class="dropdown-item" onclick="filter_state('New York')">New York</a>
+<a class="dropdown-item" onclick="filter_state('Colorado')">Colorado</a>
+<a class="dropdown-item" onclick="filter_state('Maine')">Maine</a>
+<a class="dropdown-item" onclick="filter_state('Texas')">Texas</a>
+<a class="dropdown-item" onclick="filter_state('Minnesota')">Minnesota</a>
+<a class="dropdown-item" onclick="filter_state('North Carolina')">North Carolina</a>
+<a class="dropdown-item" onclick="filter_state('Massachusetts')">Massachusetts</a>
+<a class="dropdown-item" onclick="filter_state('Connecticut')">Connecticut</a>
+<a class="dropdown-item" onclick="filter_state('Tennessee')">Tennessee</a>
+<a class="dropdown-item" onclick="filter_state('Washington')">Washington</a>
+<a class="dropdown-item" onclick="filter_state('Michigan')">Michigan</a>
+<a class="dropdown-item" onclick="filter_state('Pennsylvania')">Pennsylvania</a>
+<a class="dropdown-item" onclick="filter_state('Utah')">Utah</a>
+<a class="dropdown-item" onclick="filter_state('Louisiana')">Louisiana</a>
+<a class="dropdown-item" onclick="filter_state('Arizona')">Arizona</a>
+<a class="dropdown-item" onclick="filter_state('South Carolina')">South Carolina</a>
+<a class="dropdown-item" onclick="filter_state('New Jersey')">New Jersey</a>
+<a class="dropdown-item" onclick="filter_state('Indiana')">Indiana</a>
+<a class="dropdown-item" onclick="filter_state('Wisconsin')">Wisconsin</a>
+<a class="dropdown-item" onclick="filter_state('Georgia')">Georgia</a>
+<a class="dropdown-item" onclick="filter_state('Maryland')">Maryland</a>
+<a class="dropdown-item" onclick="filter_state('Virginia')">Virginia</a>
+<a class="dropdown-item" onclick="filter_state('New Mexico')">New Mexico</a>
+<a class="dropdown-item" onclick="filter_state('Nebraska')">Nebraska</a>
+<a class="dropdown-item" onclick="filter_state('Wyoming')">Wyoming</a>
+<a class="dropdown-item" onclick="filter_state('Nevada')">Nevada</a>
+<a class="dropdown-item" onclick="filter_state('Rhode Island')">Rhode Island</a>
+<a class="dropdown-item" onclick="filter_state('Delaware')">Delaware</a>
+<a class="dropdown-item" onclick="filter_state('West Virginia')">West Virginia</a>
+<a class="dropdown-item" onclick="filter_state('Montana')">Montana</a>
+<a class="dropdown-item" onclick="filter_state('Ohio')">Ohio</a>
+<a class="dropdown-item" onclick="filter_state('Vermont')">Vermont</a>
+<a class="dropdown-item" onclick="filter_state('Hawaii')">Hawaii</a>
+<a class="dropdown-item" onclick="filter_state('Iowa')">Iowa</a>
+<a class="dropdown-item" onclick="filter_state('Oklahoma')">Oklahoma</a>
+<a class="dropdown-item" onclick="filter_state('Kentucky')">Kentucky</a>
+<a class="dropdown-item" onclick="filter_state('Alaska')">Alaska</a>
+<a class="dropdown-item" onclick="filter_state('New Hampshire')">New Hampshire</a>
+<a class="dropdown-item" onclick="filter_state('Arkansas')">Arkansas</a>
+<a class="dropdown-item" onclick="filter_state('Mississippi')">Mississippi</a>
+<a class="dropdown-item" onclick="filter_state('Alabama')">Alabama</a>
+<a class="dropdown-item" onclick="filter_state('Kansas')">Kansas</a>
+<a class="dropdown-item" onclick="filter_state('North Dakota')">North Dakota</a>
+<a class="dropdown-item" onclick="filter_state('South Dakota')">South Dakota</a>
+
+	</div>
+</div>
+<br>
+<div class="dropdown">
+	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		Dimension
+	</button>
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+		<a class="dropdown-item" onclick="filter_dimension('all')">All</a>
+		<a class="dropdown-item" onclick="filter_dimension('levels')">Levels</a>
+		<a class="dropdown-item" onclick="filter_dimension('goal')">Goal</a>
+		<a class="dropdown-item" onclick="filter_dimension('ave_reward')">Average Reward Amount</a>
+		<a class="dropdown-item" onclick="filter_dimension('updates')">Updates</a>
+		<a class="dropdown-item" onclick="filter_dimension('title_length')">Title Length</a>
+		<a class="dropdown-item" onclick="filter_dimension('duration')">Duration</a>
+	</div>
+</div>
+<br>
+
+
+
+<!--Treemap -->
+<div id="treechart"></div>
+</div>
+<div style="margin-left:100px; float:left; background:white; color:white">.</div>
+<div style="float:left">
+
+	<h5 class="chart-title" style="margin-left:110px;">Goal</h5>
+	<div class="chart-wrapper" id="chart-distro1" style=""></div>
+	<div class="chart-wrapper" id="chart-distro7" style=""></div>
+	<h5 class="chart-title"  style="margin-left:110px;">Updates</h5>
+	<div class="chart-wrapper" id="chart-distro2" style=""></div>
+	<div class="chart-wrapper" id="chart-distro8" style=""></div>
+	<h5 class="chart-title"  style="margin-left:110px;">Levels</h5>
+	<div class="chart-wrapper" id="chart-distro3" style=""></div>
+	<div class="chart-wrapper" id="chart-distro9" style=""></div>
+
+
+
+	
+
+</div>
+
+<div style="margin-left:100px; float:left; background:white; color:white">.</div>
+<div style="float:left">
+	<h5  class="chart-title" style="margin-left:110px;">Average Reward</h5>
+	<div class="chart-wrapper" id="chart-distro4" style=""></div>
+	<div class="chart-wrapper" id="chart-distro10" style=""></div>
+	<h5  class="chart-title" style="margin-left:110px;">Title Length </h5>
+	<div class="chart-wrapper" id="chart-distro5" style=""></div>
+	<div class="chart-wrapper" id="chart-distro11" style=""></div>
+	<h5  class="chart-title" style="margin-left:110px;">Duration</h5>
+	<div class="chart-wrapper" id="chart-distro6" style=""></div>
+	<div class="chart-wrapper" id="chart-distro12" style=""></div>
+</div>
+
+<div style="position:absolute; left: 600px; display:none" id="barchartdiv">
+	<div class="widget">
+
+	<div  class="chart-wrapper" id="chart-distro13" style="position:absolute; top:0px;"></div>
+    <div  id="barchart" class="chart-container" style="position:absolute; top: 300px;"></div>
+
+    
+</div>
+</div>
+
+
+
+<script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+	var state = "all"
+	var dimension = "all"
+	var filter = []
+	var counter = 0
+	var all_data
+
+	function clear_titles(){
+
+		var x = document.getElementsByClassName("chart-title");
+
+		for (var i = 0; i < x.length; i++){
+			x[i].style.display = 'none'
+		}
+
+	}
+	function add_titles(){
+
+		var x = document.getElementsByClassName("chart-title");
+
+		for (var i = 0; i < x.length; i++){
+			x[i].style.display = 'block'
+		}
+
+	}
+
+
+	function clean_graphs(){
+		target_chart = document.getElementById('chart-distro1');
+		target_chart.style.display = 'none'
+		target_chart = document.getElementById('chart-distro2');
+		target_chart.style.display = 'none'
+		target_chart = document.getElementById('chart-distro3');
+		target_chart.style.display = 'none'
+		target_chart = document.getElementById('chart-distro4');
+		target_chart.style.display = 'none'
+		target_chart = document.getElementById('chart-distro5');
+		target_chart.style.display = 'none'
+		target_chart = document.getElementById('chart-distro6');
+		target_chart.style.display = 'none'
+		document.getElementById("chart-distro7").innerHTML = "";
+		document.getElementById("chart-distro8").innerHTML = "";
+		document.getElementById("chart-distro9").innerHTML = "";
+		document.getElementById("chart-distro10").innerHTML = "";
+		document.getElementById("chart-distro11").innerHTML = "";
+		document.getElementById("chart-distro12").innerHTML = "";
+		document.getElementById("chart-distro13").innerHTML = "";
+	}
+
+
+	function filter_dimension(dim){
+		dimension = dim
+
+		
+		document.getElementById("barchart").innerHTML = "";
+		update_bar(barchart_data)
+
+
+		if (dimension != "all"){
+			target = document.getElementById("barchartdiv");
+			target.style.display = 'block'
+			clear_titles()
+		}
+
+		if (dimension == "all") {
+			add_titles()
+			target = document.getElementById("barchartdiv");
+			target.style.display = 'none'
+				if (filter.length == 0){
+					clean_graphs()
+					target_chart = document.getElementById('chart-distro1');
+					target_chart.style.display = 'block'
+					target_chart = document.getElementById('chart-distro2');
+					target_chart.style.display = 'block'
+					target_chart = document.getElementById('chart-distro3');
+					target_chart.style.display = 'block'
+					target_chart = document.getElementById('chart-distro4');
+					target_chart.style.display = 'block'
+										target_chart = document.getElementById('chart-distro5');
+					target_chart.style.display = 'block'
+										target_chart = document.getElementById('chart-distro6');
+					target_chart.style.display = 'block'
+
+				}
+				else if (filter.length > 0){
+					filtered_data = filter_data(all_data, filter)
+					clean_graphs()
+					generate_chart(chart1, filtered_data, "#chart-distro7", "goal", 400, 600 )
+					generate_chart(chart1, filtered_data, "#chart-distro8", "updates", 400, 600 )
+					generate_chart(chart1, filtered_data, "#chart-distro9", "levels", 400, 600 )
+					generate_chart(chart1, filtered_data, "#chart-distro10", "ave_reward", 400, 600 )
+					generate_chart(chart1, filtered_data, "#chart-distro11", "title_length", 400, 600 )
+					generate_chart(chart1, filtered_data, "#chart-distro12", "duration", 400, 600 )
+				}
+		}
+		else if (dimension == "goal"){
+				if (filter.length == 0){
+					clean_graphs()
+					generate_chart(chart1, all_data, "#chart-distro13", "goal", 600,600 )
+				}
+				else if (filter.length > 0){
+					filtered_data = filter_data(all_data, filter)
+					clean_graphs()
+					generate_chart(chart1, filtered_data, "#chart-distro13", "goal",600,600 )
+				}
+		}
+		else if (dimension == "updates"){
+				if (filter.length == 0){
+					clean_graphs()
+					generate_chart(chart1, all_data, "#chart-distro13", "updates",600,600 )
+				}
+				else if (filter.length > 0){
+					filtered_data = filter_data(all_data, filter)
+					clean_graphs()
+					generate_chart(chart1, filtered_data, "#chart-distro13", "updates" ,600,600)
+				}
+		}
+		else if (dimension == "levels"){
+				if (filter.length == 0){
+					clean_graphs()
+					generate_chart(chart1, all_data, "#chart-distro13", "levels" ,600,600)
+				}
+				else if (filter.length > 0){
+					filtered_data = filter_data(all_data, filter)
+					clean_graphs()
+					generate_chart(chart1, filtered_data, "#chart-distro13", "levels" ,600,600)
+				}
+		}
+		else if (dimension == "ave_reward"){
+				if (filter.length == 0){
+					clean_graphs()
+					generate_chart(chart1, all_data, "#chart-distro13", "ave_reward" ,600,600)
+				}
+				else if (filter.length > 0){
+					filtered_data = filter_data(all_data, filter)
+					clean_graphs()
+					generate_chart(chart1, filtered_data, "#chart-distro13", "ave_reward" ,600,600)
+				}
+		}
+		else if (dimension == "title_length"){
+				if (filter.length == 0){
+					clean_graphs()
+					generate_chart(chart1, all_data, "#chart-distro13", "title_length" ,600,600)
+				}
+				else if (filter.length > 0){
+					filtered_data = filter_data(all_data, filter)
+					clean_graphs()
+					generate_chart(chart1, filtered_data, "#chart-distro13", "title_length",600,600 )
+				}
+		}
+		else if (dimension == "duration"){
+				if (filter.length == 0){
+					clean_graphs()
+					generate_chart(chart1, all_data, "#chart-distro13", "duration",600,600 )
+				}
+				else if (filter.length > 0){
+					filtered_data = filter_data(all_data, filter)
+					clean_graphs()
+					generate_chart(chart1, filtered_data, "#chart-distro13", "duration",600,600 )
+				}
+		}
+	}
+
+	var g_state = ""
+	function filter_state(state) {
+		g_state = state
+		filter_dimension(dimension)
+	}
+
+	window.addEventListener('message', function(e) {
+			var opts = e.data.opts,
+					data = e.data.data;
+
+			return main(opts, data);
+	});
+
+	var defaults = {
+			margin: {top: 24, right: 0, bottom: 0, left: 0},
+			rootname: "TOP",
+			format: ",d",
+			title: "",
+			width: 400,
+			height: 400
+	};
+
+	function main(o, data) {
+		var root,
+				opts = $.extend(true, {}, defaults, o),
+				formatNumber = d3.format(opts.format),
+				rname = opts.rootname,
+				margin = opts.margin,
+				theight = 36 + 16;
+
+		$('#treechart').width(opts.width).height(opts.height);
+		var width = opts.width - margin.left - margin.right,
+				height = opts.height - margin.top - margin.bottom - theight,
+				transitioning;
+		
+		var color = d3.scale.category20c();
+		
+		var x = d3.scale.linear()
+				.domain([0, width])
+				.range([0, width]);
+		
+		var y = d3.scale.linear()
+				.domain([0, height])
+				.range([0, height]);
+		
+		var treemap = d3.layout.treemap()
+				.children(function(d, depth) { return depth ? null : d._children; })
+				.sort(function(a, b) { return a.value - b.value; })
+				.ratio(height / width * 0.5 * (1 + Math.sqrt(5)))
+				.round(false);
+		
+		var svg = d3.select("#treechart").append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.bottom + margin.top)
+				.style("margin-left", -margin.left + "px")
+				.style("margin.right", -margin.right + "px")
+			.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+				.style("shape-rendering", "crispEdges");
+		
+		var grandparent = svg.append("g")
+				.attr("class", "grandparent");
+		
+		grandparent.append("rect")
+				.attr("y", -margin.top)
+				.attr("width", width)
+				.attr("height", margin.top);
+		
+		grandparent.append("text")
+				.attr("x", 6)
+				.attr("y", 6 - margin.top)
+				.attr("dy", ".75em");
+
+		if (opts.title) {
+			$("#treechart").prepend("<p class='title'>" + opts.title + "</p>");
+		}
+		if (data instanceof Array) {
+			root = { key: rname, values: data };
+		} else {
+			root = data;
+		}
+			
+		initialize(root);
+		accumulate(root);
+		layout(root);
+		//console.log(root);
+		display(root);
+
+		if (window.parent !== window) {
+			var myheight = document.documentElement.scrollHeight || document.body.scrollHeight;
+			window.parent.postMessage({height: myheight}, '*');
+		}
+
+		function initialize(root) {
+			root.x = root.y = 0;
+			root.dx = width;
+			root.dy = height;
+			root.depth = 0;
+		}
+
+		// Aggregate the values for internal nodes. This is normally done by the
+		// treemap layout, but not here because of our custom implementation.
+		// We also take a snapshot of the original children (_children) to avoid
+		// the children being overwritten when when layout is computed.
+		function accumulate(d) {
+			return (d._children = d.values)
+					? d.value = d.values.reduce(function(p, v) { return p + accumulate(v); }, 0)
+					: d.value;
+		}
+
+		// Compute the treemap layout recursively such that each group of siblings
+		// uses the same size (1×1) rather than the dimensions of the parent cell.
+		// This optimizes the layout for the current zoom state. Note that a wrapper
+		// object is created for the parent node for each group of siblings so that
+		// the parent’s dimensions are not discarded as we recurse. Since each group
+		// of sibling was laid out in 1×1, we must rescale to fit using absolute
+		// coordinates. This lets us use a viewport to zoom.
+		function layout(d) {
+			if (d._children) {
+				treemap.nodes({_children: d._children});
+				d._children.forEach(function(c) {
+					c.x = d.x + c.x * d.dx;
+					c.y = d.y + c.y * d.dy;
+					c.dx *= d.dx;
+					c.dy *= d.dy;
+					c.parent = d;
+					layout(c);
+				});
+			}
+		}
+
+		function display(d) {
+			grandparent
+					.datum(d.parent)
+					.on("click", transition)
+				.select("text")
+					.text(name(d));
+
+			var g1 = svg.insert("g", ".grandparent")
+					.datum(d)
+					.attr("class", "depth");
+
+			var g = g1.selectAll("g")
+					.data(d._children)
+				.enter().append("g");
+
+			g.filter(function(d) { return d._children; })
+					.classed("children", true)
+					.on("click", transition);
+
+			var children = g.selectAll(".child")
+					.data(function(d) { return d._children || [d]; })
+				.enter().append("g");
+
+			children.append("rect")
+					.attr("class", "child")
+					.call(rect)
+				.append("title")
+					.text(function(d) { return d.key + " (" + formatNumber(d.value) + ")"; });
+			children.append("text")
+					.attr("class", "ctext")
+					.text(function(d) { return d.key; })
+					.call(text2);
+
+			g.append("rect")
+					.attr("class", "parent")
+					.call(rect);
+
+			var t = g.append("text")
+					.attr("class", "ptext")
+					.attr("dy", ".75em")
+
+			t.append("tspan")
+					.text(function(d) { return d.key; });
+			t.append("tspan")
+					.attr("dy", "1.0em")
+					.text(function(d) { return formatNumber(d.value); });
+			t.call(text);
+
+			g.selectAll("rect")
+					.style("fill", function(d) { return color(d.key); });
+
+			function transition(d) {
+
+				if (transitioning || !d) return;
+
+				if (d.key == "All campaigns"){
+					filter = []
+					counter = 0
+				}
+				else if (counter == 2) {
+					filter.pop()					
+					counter = 1
+				}
+				else {
+				filter.push(d.key)
+				counter += 1
+				}
+
+				//console.log(filter, counter)
+
+				filter_dimension(dimension)
+
+				transitioning = true;
+
+				var g2 = display(d),
+						t1 = g1.transition().duration(750),
+						t2 = g2.transition().duration(750);
+
+				// Update the domain only after entering new elements.
+				x.domain([d.x, d.x + d.dx]);
+				y.domain([d.y, d.y + d.dy]);
+
+				// Enable anti-aliasing during the transition.
+				svg.style("shape-rendering", null);
+
+				// Draw child nodes on top of parent nodes.
+				svg.selectAll(".depth").sort(function(a, b) { return a.depth - b.depth; });
+
+				// Fade-in entering text.
+				g2.selectAll("text").style("fill-opacity", 0);
+
+				// Transition to the new view.
+				t1.selectAll(".ptext").call(text).style("fill-opacity", 0);
+				t1.selectAll(".ctext").call(text2).style("fill-opacity", 0);
+				t2.selectAll(".ptext").call(text).style("fill-opacity", 1);
+				t2.selectAll(".ctext").call(text2).style("fill-opacity", 1);
+				t1.selectAll("rect").call(rect);
+				t2.selectAll("rect").call(rect);
+
+				// Remove the old node when the transition is finished.
+				t1.remove().each("end", function() {
+					svg.style("shape-rendering", "crispEdges");
+					transitioning = false;
+				});
+			}
+
+			return g;
+		}
+
+		function text(text) {
+			text.selectAll("tspan")
+					.attr("x", function(d) { return x(d.x) + 6; })
+			text.attr("x", function(d) { return x(d.x) + 6; })
+					.attr("y", function(d) { return y(d.y) + 6; })
+					.style("opacity", function(d) { return this.getComputedTextLength() < x(d.x + d.dx) - x(d.x) ? 1 : 0; });
+		}
+
+		function text2(text) {
+			text.attr("x", function(d) { return x(d.x + d.dx) - this.getComputedTextLength() - 6; })
+					.attr("y", function(d) { return y(d.y + d.dy) - 6; })
+					.style("opacity", function(d) { return this.getComputedTextLength() < x(d.x + d.dx) - x(d.x) ? 1 : 0; });
+		}
+
+		function rect(rect) {
+			rect.attr("x", function(d) { return x(d.x); })
+					.attr("y", function(d) { return y(d.y); })
+					.attr("width", function(d) { return x(d.x + d.dx) - x(d.x); })
+					.attr("height", function(d) { return y(d.y + d.dy) - y(d.y); });
+		}
+
+		function name(d) {
+			return d.parent
+					? name(d.parent) + " / " + d.key + " (" + formatNumber(d.value) + ")"
+					: d.key + " (" + formatNumber(d.value) + ")";
+		}
+	}
+
+	if (window.location.hash === "") {
+			d3.json("treemap.json", function(err, res) {
+					if (!err) {
+							//console.log(res);
+							var data = d3.nest().key(function(d) { return d.category; }).key(function(d) { return d.subcategory; }).entries(res);
+							main({title: "Number of Campaigns"}, {key: "All campaigns", values: data});
+					}
+			});
+	}
+</script>
+
+<!--Notes: move to right, add header, color-->
+
+<!--Beanplot-->
+<link rel="stylesheet" type="text/css" href="distrochart.css">
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script src="distrochart.js" charset="utf-8"></script>
+<script type="text/javascript">
+
+	var chart1;
+	var chart2;
+	var chart3;
+	var chart4;
+	var chart5;
+	var chart6;
+
+	function generate_chart(chart1, data, selector, param, h, w) {
+				chart1 = makeDistroChart({
+						data:data,
+						xName:'status',
+						yName: param,
+						axisLabels: {xAxis: null, yAxis: param},
+						selector: selector,
+						chartSize:{height:h, width:w},
+						constrainExtremes:true});
+				//chart1.renderBoxPlot();
+				//chart1.renderDataPlots();
+				//chart1.renderNotchBoxes({showNotchBox:false});
+				chart1.renderViolinPlot({showViolinPlot:false});
+				chart1.violinPlots.show({reset:true, width:75, clamp:0, resolution:60, bandwidth:50});
+
+				//chart1.dataPlots.show({showBeanLines:true,beanWidth:15,showPlot:false,colors:['#555']});
+				//chart1.boxPlots.hide();
+				//chart1.notchBoxes.hide();
+
+				return chart1
+	}
+
+	function filter_data(data, filter) {
+		var filtered_data = []
+		for (var i = 0; i < data.length; i++){
+			if (filter.length == 2){
+				if (data[i]["category"] == filter[0] && data[i]["subcategory"] == filter[1]){
+					filtered_data.push(data[i])
+				}
+			}
+			else if (filter.length == 1){
+				if (data[i]["category"] == filter[0]){
+					filtered_data.push(data[i])
+				}
+			}
+			else if (filter.length == 0){
+				return data
+			}
+		}
+		return filtered_data
+	}
+
+		d3.csv('cleaned_USA_Final.csv', function(error, data) {
+				data.forEach(function (d) {d.goal = +d.goal;});
+
+					all_data = data
+
+				//console.log()
+
+				chart1 = generate_chart(chart1, data, "#chart-distro1", "goal", 400, 600)
+
+				
+
+				generate_chart(chart2, data, "#chart-distro2", "updates" , 400, 600)
+				generate_chart(chart3, data, "#chart-distro3", "levels" , 400, 600)
+				generate_chart(chart4, data, "#chart-distro4", "title_length" , 400, 600)
+				generate_chart(chart5, data, "#chart-distro5", "duration" , 400, 600)
+				generate_chart(chart6, data, "#chart-distro6", "ave_reward" , 400, 600)
+
+
+		});
+
+
+
+
+
+</script>
+
+
+<script>
+
+
+
+function filter_sub(data, category, state, sub) {
+
+			// category == msuic, sub == "msuic"
+			//combine top 5 state
+
+			// category == "" and state == ""
+			// combine
+
+			temp = []
+
+			// 111
+
+			if (category != "" && sub !== "" && state != ""){
+				for (var j = 0; j < 1; j++){
+					//console.log(data)
+					max = 0
+					var mark
+					for (var i = data.length-1; i > 0; i--){
+
+						if (parseInt(data[i]["success"]) > max
+						 && (data[i]["category"] == category || category == "")
+						 && (data[i]["state"] == state || category == "")
+						 && (data[i]["sub"] == sub || sub == "")){
+
+							max = data[i]["success"]
+							mystruct = data[i]
+							mystruct["success"] = parseInt(data[i]["success"])
+							mystruct["failed"] = parseInt(data[i]["failed"])
+							mark = i
+						}
+
+					}
+					data.splice(mark,1)
+					temp.push(mystruct)
+				}
+				show_sub(temp)
+			}
+
+			// 011
+
+
+			if (category != "" && sub !== "" && state == ""){
+
+				group = []
+
+				tot_success = 0
+				tot_failed = 0
+				// Aggregate
+				// music music CA
+				// music music  NY
+				for (var i = data.length-1; i > 0; i--){
+					if (data[i]["category"] == category && data[i]["sub"] == sub){
+						tot_success += parseInt(data[i]["success"])
+						tot_failed += parseInt(data[i]["failed"])
+						mystruct = data[i]
+					}
+				}
+				mystruct["success"] = tot_success
+				mystruct["failed"] = tot_failed
+				temp.push(mystruct)
+				show_sub(temp)
+			}
+
+			// 110
+
+			if (category != "" && sub == "" && state != ""){
+				for (var j = 0; j < 5; j++){
+					//console.log(data)
+					max = 0
+					var mark
+					for (var i = data.length-1; i > 0; i--){
+
+						if (parseInt(data[i]["success"]) > max
+						 && (data[i]["category"] == category || category == "")
+						 && (data[i]["state"] == state || category == "")
+						 && (data[i]["sub"] == sub || sub == "")){
+
+							max = data[i]["success"]
+							mystruct = data[i]
+							mystruct["success"] = parseInt(data[i]["success"])
+							mystruct["failed"] = parseInt(data[i]["failed"])
+							mark = i
+						}
+
+					}
+					data.splice(mark,1)
+					temp.push(mystruct)
+				}
+				show_sub(temp)
+			}
+
+			// 000
+
+			// NY, A, B
+			// 
+
+			if (category == "" && sub == "" && state == ""){
+
+				dict = {}
+				temp2 = []
+				for (var i = data.length-1; i > 0; i--){
+
+					if (data[i]["state"] in dict){
+						dict[data[i]["state"]][0] += parseInt(data[i]["success"])
+						dict[data[i]["state"]][1] += parseInt(data[i]["failed"])
+					}
+					else {
+						dict[data[i]["state"]] = [parseInt(data[i]["success"]), parseInt(data[i]["failed"])]
+					}
+					//If not there,
+					//NY = S,F
+					//if there
+					//NY += S,F
+				}
+				for (var x in dict){
+					//console.log(dict[x])
+					mystruct = {"state":x, "success":dict[x][0], "failed":dict[x][1]}
+					//console.log(mystruct)
+					temp2.push(mystruct)
+				}
+
+				for (var j = 0; j < 5; j++){
+					max = 0
+					var mark
+					for (var i = temp2.length-1; i > 0; i--){
+
+						if (parseInt(temp2[i]["success"]) > max){
+
+							max = temp2[i]["success"]
+							mystruct = temp2[i]
+							mystruct["success"] = parseInt(temp2[i]["success"])
+							mystruct["failed"] = parseInt(temp2[i]["failed"])
+							mark = i
+						}
+
+					}
+					temp2.splice(mark,1)
+					temp.push(mystruct)
+				}
+
+	    		show_state(temp)
+			}
+
+			// 100
+			if (category == "" && sub == "" && state != ""){
+
+				dict = {}
+				temp2 = []
+
+
+				for (var i = data.length-1; i > 0; i--){
+
+					if (data[i]["state"] != state) {
+						continue
+					}
+
+					if (data[i]["category"] in dict){
+						dict[data[i]["category"]][0] += parseInt(data[i]["success"])
+						dict[data[i]["category"]][1] += parseInt(data[i]["failed"])
+					}
+					else {
+						dict[data[i]["category"]] = [parseInt(data[i]["success"]), parseInt(data[i]["failed"])]
+					}
+					//If not there,
+					//NY = S,F
+					//if there
+					//NY += S,F
+				}
+				for (var x in dict){
+					//console.log(dict[x])
+					mystruct = {"category":x, "success":dict[x][0], "failed":dict[x][1]}
+					//console.log(mystruct)
+					temp2.push(mystruct)
+				}
+
+				for (var j = 0; j < 5; j++){
+					max = 0
+					var mark
+					for (var i = temp2.length-1; i > 0; i--){
+
+						if (parseInt(temp2[i]["success"]) > max){
+
+							max = temp2[i]["success"]
+							mystruct = temp2[i]
+							mystruct["success"] = parseInt(temp2[i]["success"])
+							mystruct["failed"] = parseInt(temp2[i]["failed"])
+							mark = i
+						}
+
+					}
+					temp2.splice(mark,1)
+					temp.push(mystruct)
+				}
+
+	    		show_cat(temp)
+			}
+
+
+
+			// 010
+			if (category != "" && sub == "" && state == ""){
+
+				dict = {}
+				temp2 = []
+				for (var i = data.length-1; i > 0; i--){
+
+					if (data[i]["category"] != category){
+						continue
+					}
+
+					if (data[i]["state"] in dict){
+						dict[data[i]["state"]][0] += parseInt(data[i]["success"])
+						dict[data[i]["state"]][1] += parseInt(data[i]["failed"])
+					}
+					else {
+						dict[data[i]["state"]] = [parseInt(data[i]["success"]), parseInt(data[i]["failed"])]
+					}
+					//If not there,
+					//NY = S,F
+					//if there
+					//NY += S,F
+				}
+				for (var x in dict){
+					//console.log(dict[x])
+					mystruct = {"state":x, "success":dict[x][0], "failed":dict[x][1]}
+					//console.log(mystruct)
+					temp2.push(mystruct)
+				}
+
+				for (var j = 0; j < 5; j++){
+					max = 0
+					var mark
+					for (var i = temp2.length-1; i > 0; i--){
+
+						if (parseInt(temp2[i]["success"]) > max){
+
+							max = temp2[i]["success"]
+							mystruct = temp2[i]
+							mystruct["success"] = parseInt(temp2[i]["success"])
+							mystruct["failed"] = parseInt(temp2[i]["failed"])
+							mark = i
+						}
+
+					}
+					temp2.splice(mark,1)
+					temp.push(mystruct)
+				}
+
+	    		show_state(temp)
+			}
+
+}
+
+function show_state(data){
+
+var format = d3.format(".2%")
+
+
+	    var xData = ["success", "failed"];
+
+var margin = {
+    top: 20,
+    right: 50,
+    bottom: 30,
+    left: 0
+  },
+  width = 600 - margin.left - margin.right,
+  height = 300 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+  .rangeRoundBands([0, width], .35);
+
+var y = d3.scale.linear()
+  .rangeRound([height, 0]);
+
+var color = d3.scale.category20();
+
+var xAxis = d3.svg.axis()
+  .scale(x)
+  .orient("bottom");
+
+var svg = d3.select("#barchart").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+var dataIntermediate = xData.map(function(c) {
+  return data.map(function(d) {
+    return {
+      x: d.state,
+      y: d[c]
+    };
+  });
+});
+
+var dataStackLayout = d3.layout.stack()(dataIntermediate);
+
+x.domain(dataStackLayout[0].map(function(d) {
+  return d.x;
+}));
+
+y.domain([0,
+    d3.max(dataStackLayout[dataStackLayout.length - 1],
+      function(d) {
+        return d.y0 + d.y;
+      })
+  ])
+  .nice();
+
+var sum = 0;
+
+dataStackLayout.forEach(d => {
+  sum += d[0].y
+});
+
+var layer = svg.selectAll(".stack")
+  .data(dataStackLayout)
+  .enter().append("g")
+  .attr("class", "stack")
+  .style("fill", function(d, i) {
+    return color(i);
+  });
+
+layer.selectAll("foo")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("text")
+  .attr("x", function(d) {
+    return x(d.x) + x.rangeBand() + 4;
+  })
+  .attr("y", function(d) {
+    return (y(d.y + d.y0) + y(d.y0)) / 2;
+  })
+  .text(d => format(d.y / sum))
+  .style("font-size", "10px")
+
+
+layer.selectAll("rect")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("rect")
+  .attr("x", function(d) {
+    return x(d.x);
+  })
+  .attr("y", function(d) {
+    return y(d.y + d.y0);
+  })
+  .attr("height", function(d) {
+    return y(d.y0) - y(d.y + d.y0);
+  })
+  .attr("width", x.rangeBand());
+
+svg.append("g")
+  .attr("class", "axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
+}
+
+function show_cat(data){
+
+var format = d3.format(".2%")
+
+
+	    var xData = ["success", "failed"];
+
+var margin = {
+    top: 20,
+    right: 50,
+    bottom: 30,
+    left: 0
+  },
+  width = 600 - margin.left - margin.right,
+  height = 300 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+  .rangeRoundBands([0, width], .35);
+
+var y = d3.scale.linear()
+  .rangeRound([height, 0]);
+
+var color = d3.scale.category20();
+
+var xAxis = d3.svg.axis()
+  .scale(x)
+  .orient("bottom");
+
+var svg = d3.select("#barchart").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+var dataIntermediate = xData.map(function(c) {
+  return data.map(function(d) {
+    return {
+      x: d.category,
+      y: d[c]
+    };
+  });
+});
+
+var dataStackLayout = d3.layout.stack()(dataIntermediate);
+
+x.domain(dataStackLayout[0].map(function(d) {
+  return d.x;
+}));
+
+y.domain([0,
+    d3.max(dataStackLayout[dataStackLayout.length - 1],
+      function(d) {
+        return d.y0 + d.y;
+      })
+  ])
+  .nice();
+
+var sum = 0;
+
+dataStackLayout.forEach(d => {
+  sum += d[0].y
+});
+
+var layer = svg.selectAll(".stack")
+  .data(dataStackLayout)
+  .enter().append("g")
+  .attr("class", "stack")
+  .style("fill", function(d, i) {
+    return color(i);
+  });
+
+layer.selectAll("foo")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("text")
+  .attr("x", function(d) {
+    return x(d.x) + x.rangeBand() + 4;
+  })
+  .attr("y", function(d) {
+    return (y(d.y + d.y0) + y(d.y0)) / 2;
+  })
+  .text(d => format(d.y / sum))
+  .style("font-size", "10px")
+
+
+layer.selectAll("rect")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("rect")
+  .attr("x", function(d) {
+    return x(d.x);
+  })
+  .attr("y", function(d) {
+    return y(d.y + d.y0);
+  })
+  .attr("height", function(d) {
+    return y(d.y0) - y(d.y + d.y0);
+  })
+  .attr("width", x.rangeBand());
+
+svg.append("g")
+  .attr("class", "axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
+}
+function show_sub(data){
+
+
+var format = d3.format(".2%")
+
+
+	    var xData = ["success", "failed"];
+
+var margin = {
+    top: 20,
+    right: 50,
+    bottom: 30,
+    left: 0
+  },
+  width = 600 - margin.left - margin.right,
+  height = 300 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+  .rangeRoundBands([0, width], .35);
+
+var y = d3.scale.linear()
+  .rangeRound([height, 0]);
+
+var color = d3.scale.category20();
+
+var xAxis = d3.svg.axis()
+  .scale(x)
+  .orient("bottom");
+
+var svg = d3.select("#barchart").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+var dataIntermediate = xData.map(function(c) {
+  return data.map(function(d) {
+    return {
+      x: d.sub,
+      y: d[c]
+    };
+  });
+});
+
+var dataStackLayout = d3.layout.stack()(dataIntermediate);
+
+x.domain(dataStackLayout[0].map(function(d) {
+  return d.x;
+}));
+
+y.domain([0,
+    d3.max(dataStackLayout[dataStackLayout.length - 1],
+      function(d) {
+        return d.y0 + d.y;
+      })
+  ])
+  .nice();
+
+var sum = 0;
+
+dataStackLayout.forEach(d => {
+  sum += d[0].y
+});
+
+var layer = svg.selectAll(".stack")
+  .data(dataStackLayout)
+  .enter().append("g")
+  .attr("class", "stack")
+  .style("fill", function(d, i) {
+    return color(i);
+  });
+
+layer.selectAll("foo")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("text")
+  .attr("x", function(d) {
+    return x(d.x) + x.rangeBand() + 4;
+  })
+  .attr("y", function(d) {
+    return (y(d.y + d.y0) + y(d.y0)) / 2;
+  })
+  .text(d => format(d.y / sum))
+  .style("font-size", "10px")
+
+
+layer.selectAll("rect")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("rect")
+  .attr("x", function(d) {
+    return x(d.x);
+  })
+  .attr("y", function(d) {
+    return y(d.y + d.y0);
+  })
+  .attr("height", function(d) {
+    return y(d.y0) - y(d.y + d.y0);
+  })
+  .attr("width", x.rangeBand());
+
+svg.append("g")
+  .attr("class", "axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(xAxis);
+}
+
+
+	function isInList(myarr, myobj) {
+		for (var i = 0; i < myarr.length; i++){
+
+			
+
+			if (myarr[i]["sub"] == myobj["subcategory"] && myarr[i]["category"] == myobj["category"] && myarr[i]["state"] == myobj["USA State"]){
+
+				return i
+			}
+		}
+		return -1
+	}
+	var barchart_data
+
+
+	function update_bar(data){
+
+document.getElementById("barchart").innerHTML = "";
+
+
+	d3.csv('cleaned_USA_Final.csv', function(error, data) {
+		barchart_data = data
+
+		year_filter = []
+
+		console.log(g_year_min, g_year_max)
+
+		for (var i = 0; i < data.length; i++){
+
+			if (g_year_min <= parseInt(data[i]["year launched"]) && parseInt(data[i]["year launched"]) <= g_year_max){
+				year_filter.push(data[i])
+			}
+		}
+
+
+		agg_data = []
+
+		for (var i = 0; i < year_filter.length; i++){
+			//for (var i = 0; i < 100; i++){
+
+			tempstruct = {}
+			t = year_filter[i]
+
+			if (t["status"] == "successful"){
+
+				exists = isInList(agg_data, t)
+
+
+
+				if (exists != -1){
+	
+					agg_data[exists]["success"] += 1 
+
+				}
+				else {
+
+					tempstruct = {sub:t["subcategory"] , category:t["category"], state:t["USA State"], success:1, failed:0}
+					agg_data.push(tempstruct)
+
+				}
+			}
+			if (t["status"] == "failed"){
+
+				exists = isInList(agg_data, t)
+
+				if (exists != -1){
+					agg_data[exists]["failed"] += 1 
+				}
+				else {
+					tempstruct = {sub:t["subcategory"] , category:t["category"], state:t["USA State"], success:0, failed:1}
+					agg_data.push(tempstruct)
+
+				}
+			}
+
+		}
+
+		if (filter[0] == undefined){
+			filter0 = ""
+		}
+		else {filter0 = filter[0]}
+		if (filter[1] == undefined){
+			filter1 = ""
+		}
+		else {filter1 = filter[1]}
+		filter_sub(agg_data, filter0, g_state, filter1)
+
+
+	});
+	
+	}
+
+/*
+success = dict()
+failed = dict()
+
+with open('cleaned_USA_Final.csv', 'r', encoding="utf8") as csvfile:
+	spamreader = csv.reader(csvfile, delimiter=',')
+	for row in spamreader:
+		key = row[2]+"---celestinaisadorable---"+row[3]+"---celestinaisadorable---"+row[20]
+		if row[5] == "successful":
+			if key in success:
+				success[key] += 1
+			else:
+				success[key] = 1
+*/
+
+</script>
+
+</body>
+</html>
