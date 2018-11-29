@@ -140,9 +140,16 @@ function makeDistroChart(settings) {
     function tooltipHover(groupName, metrics) {
         var tooltipString = "Group: " + groupName;
         tooltipString += "<br\>Max: " + formatAsFloat(metrics.max, 0.1);
-        tooltipString += "<br\>Q3: " + formatAsFloat(metrics.quartile3);
-        tooltipString += "<br\>Median: " + formatAsFloat(metrics.median);
-        tooltipString += "<br\>Q1: " + formatAsFloat(metrics.quartile1);
+        if (metrics.quartile1 < metrics.quartile3) {
+            tooltipString += "<br\>Q1: " + formatAsFloat(metrics.quartile1);
+            tooltipString += "<br\>Median: " + formatAsFloat(metrics.median);
+            tooltipString += "<br\>Q3: " + formatAsFloat(metrics.quartile3);
+        }
+        else {
+            tooltipString += "<br\>Q1: " + formatAsFloat(metrics.quartile3);
+            tooltipString += "<br\>Median: " + formatAsFloat(metrics.median);
+            tooltipString += "<br\>Q3: " + formatAsFloat(metrics.quartile1); 
+        }
         tooltipString += "<br\>Min: " + formatAsFloat(metrics.min);
         return function () {
             chart.objs.tooltip.transition().duration(200).style("opacity", 0.9);

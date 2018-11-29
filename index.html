@@ -8,7 +8,15 @@
 		background: #fff;
 		font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	}
-
+/*
+	.tree {
+		      transition: .5s ease;
+  backface-visibility: hidden;
+	}
+	.tree:hover {
+		opacity: 0.6;
+	}
+*/
 	.title {
 			font-weight: bold;
 			font-size: 24px;
@@ -92,52 +100,71 @@
 <div  style="float:left">
 
 <div class="slidecontainer">
-	<input  onchange="updateSlider()" style="float:left"type="range" min="2015" max="2018" value="2015" class="slider" id="myRange">
-	<p style="float:left">Year: <span id="demo"></span></p>
+	<input  onchange="updateSlider()" style="float:left; display:none"type="range" min="2015" max="2018" value="2015" class="slider" id="myRange">
+	<p style="float:left; display:none">Year: <span id="demo"></span></p>
 </div>
 <div class="slidecontainer">
-	<input  onchange="updateSlider()" style="float:left" type="range" min="2015" max="2018" value="2018" class="slider2" id="myRange2">
-	<p style="float:left">Year: <span id="demo2"></span></p>
+	<input  onchange="updateSlider()" style="float:left; display:none" type="range" min="2015" max="2018" value="2018" class="slider2" id="myRange2">
+	<p style="float:left;display:none">Year: <span id="demo2"></span></p>
 </div>
 <div style="clear:both"></div>
 <script>
+	var g_state = ""
+g_generate = 1
 
-	function updateSlider(){
-		var slider = document.getElementById("myRange");
-var output = document.getElementById("demo");
-output.innerHTML = slider.value;
-g_year_min = slider.value;
 
-slider.oninput = function() {
-  output.innerHTML = this.value;
-}
-var slider2 = document.getElementById("myRange2");
-var output2 = document.getElementById("demo2");
-output2.innerHTML = slider2.value;
-g_year_max = slider2.value;
-slider2.oninput = function() {
-  output2.innerHTML = this.value;
-}
+
+
+var g_year_min = 2015
+var g_year_max = 2018
+
+	function filter_year1(year){
+		g_year_min = year
+
+x = document.getElementById("dropdownMenuButton3")
+x.innerHTML = "From: " + year
 update_bar()
+filter_state2(g_state)
 	}
 
-var g_year_min
-var g_year_max 
-var slider = document.getElementById("myRange");
-var output = document.getElementById("demo");
-output.innerHTML = slider.value;
-g_year_min = slider.value;
-slider.oninput = function() {
-  output.innerHTML = this.value;
-}
-var slider2 = document.getElementById("myRange2");
-var output2 = document.getElementById("demo2");
-output2.innerHTML = slider2.value;
-g_year_max = slider2.value;
-slider2.oninput = function() {
-  output2.innerHTML = this.value;
-}
+	function filter_year2(year){
+		g_year_max = year
+		x = document.getElementById("dropdownMenuButton4")
+		x.innerHTML = "To: " + year
+		
+update_bar()
+filter_state2(g_state)
+	}
+
 </script>
+
+
+<div class="dropdown">
+	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton3" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		From: 2015
+	</button>
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
+		<a class="dropdown-item" onclick="filter_year1('2015')">2015</a>
+		<a class="dropdown-item" onclick="filter_year1('2016')">2016</a>
+		<a class="dropdown-item" onclick="filter_year1('2017')">2017</a>
+		<a class="dropdown-item" onclick="filter_year1('2018')">2018</a>
+
+	</div>
+</div>
+<br>
+<div class="dropdown">
+	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton4" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+		To: 2018
+	</button>
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton4">
+		<a class="dropdown-item" onclick="filter_year2('2015')">2015</a>
+		<a class="dropdown-item" onclick="filter_year2('2016')">2016</a>
+		<a class="dropdown-item" onclick="filter_year2('2017')">2017</a>
+		<a class="dropdown-item" onclick="filter_year2('2018')">2018</a>
+
+	</div>
+</div>
+<br>
 
 <div class="dropdown">
 	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -200,10 +227,10 @@ slider2.oninput = function() {
 </div>
 <br>
 <div class="dropdown">
-	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 		Dimension
 	</button>
-	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+	<div class="dropdown-menu" aria-labelledby="dropdownMenuButton2">
 		<a class="dropdown-item" onclick="filter_dimension('all')">All</a>
 		<a class="dropdown-item" onclick="filter_dimension('levels')">Levels</a>
 		<a class="dropdown-item" onclick="filter_dimension('goal')">Goal</a>
@@ -218,7 +245,8 @@ slider2.oninput = function() {
 
 
 <!--Treemap -->
-<div id="treechart"></div>
+
+<div id="treechart" class="tree"></div>
 </div>
 <div style="margin-left:100px; float:left; background:white; color:white">.</div>
 <div style="float:left">
@@ -253,10 +281,13 @@ slider2.oninput = function() {
 </div>
 
 <div style="position:absolute; left: 600px; display:none" id="barchartdiv">
+	<h5  id="solo-chart" style="margin-left:110px; margin-top:-20px;">Duration</h5>
 	<div class="widget">
-
+	<img src="y.png" style="position: absolute; width:18px; left: 0px; top: 315px;">
 	<div  class="chart-wrapper" id="chart-distro13" style="position:absolute; top:0px;"></div>
-    <div  id="barchart" class="chart-container" style="position:absolute; top: 300px;"></div>
+	<h5  id="solobar-chart" style="margin-left:110px; margin-top:290px;">Duration</h5>
+    <div  id="barchart" class="chart-container" style="position:absolute; top: 320px;"></div>
+    <img src="status.png" style="width:100px; margin-left: 550px;">
 
     
 </div>
@@ -267,6 +298,8 @@ slider2.oninput = function() {
 <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
 <script src="http://d3js.org/d3.v3.min.js"></script>
 <script>
+
+
 
 	var state = "all"
 	var dimension = "all"
@@ -319,10 +352,30 @@ slider2.oninput = function() {
 
 	function filter_dimension(dim){
 		dimension = dim
+		string = dimension
+		button = document.getElementById('dropdownMenuButton2');
+				string = string.replace(/[_-]/g, " ");  
+		button.innerHTML = string.charAt(0).toUpperCase() + string.slice(1);
 
-		
+
+				document.getElementById("solo-chart").innerHTML = string.charAt(0).toUpperCase() + string.slice(1);
 		document.getElementById("barchart").innerHTML = "";
 		update_bar(barchart_data)
+
+		string = g_state 
+		string = string.charAt(0).toUpperCase() + string.slice(1);
+		if (string == ""){ string = "All"}
+
+		if (filter[0] == undefined) {
+			a = "All"
+		}
+		else {a = filter[0]}
+		if (filter[1] == undefined) {
+			b = "All"
+		}
+		else {b = filter[1]}
+
+document.getElementById("solobar-chart").innerHTML = "Highest Successful Campaigns Ratio by " + string + " / " + a + " / " + b;
 
 
 		if (dimension != "all"){
@@ -354,86 +407,118 @@ slider2.oninput = function() {
 				else if (filter.length > 0){
 					filtered_data = filter_data(all_data, filter)
 					clean_graphs()
-					generate_chart(chart1, filtered_data, "#chart-distro7", "goal", 400, 600 )
-					generate_chart(chart1, filtered_data, "#chart-distro8", "updates", 400, 600 )
-					generate_chart(chart1, filtered_data, "#chart-distro9", "levels", 400, 600 )
-					generate_chart(chart1, filtered_data, "#chart-distro10", "ave_reward", 400, 600 )
-					generate_chart(chart1, filtered_data, "#chart-distro11", "title_length", 400, 600 )
-					generate_chart(chart1, filtered_data, "#chart-distro12", "duration", 400, 600 )
+					generate_chart(chart1, filtered_data, "#chart-distro7", "goal", 400, 600, "Goal in dollars" )
+					generate_chart(chart1, filtered_data, "#chart-distro8", "updates", 400, 600 , "Number of updates")
+					generate_chart(chart1, filtered_data, "#chart-distro9", "levels", 400, 600, "Levels" )
+					generate_chart(chart1, filtered_data, "#chart-distro10", "ave_reward", 400, 600, "Average reward" )
+					generate_chart(chart1, filtered_data, "#chart-distro11", "title_length", 400, 600 , "Title Length")
+					generate_chart(chart1, filtered_data, "#chart-distro12", "duration", 400, 600, "Duration in days")
 				}
 		}
 		else if (dimension == "goal"){
 				if (filter.length == 0){
 					clean_graphs()
-					generate_chart(chart1, all_data, "#chart-distro13", "goal", 600,600 )
+					generate_chart(chart1, all_data, "#chart-distro13", "goal", 600,600, "Goal in dollars" )
 				}
 				else if (filter.length > 0){
 					filtered_data = filter_data(all_data, filter)
 					clean_graphs()
-					generate_chart(chart1, filtered_data, "#chart-distro13", "goal",600,600 )
+					generate_chart(chart1, filtered_data, "#chart-distro13", "goal",600,600 , "Goal in dollars")
 				}
 		}
 		else if (dimension == "updates"){
 				if (filter.length == 0){
 					clean_graphs()
-					generate_chart(chart1, all_data, "#chart-distro13", "updates",600,600 )
+					generate_chart(chart1, all_data, "#chart-distro13", "updates",600,600 , "Number of updates")
 				}
 				else if (filter.length > 0){
 					filtered_data = filter_data(all_data, filter)
 					clean_graphs()
-					generate_chart(chart1, filtered_data, "#chart-distro13", "updates" ,600,600)
+					generate_chart(chart1, filtered_data, "#chart-distro13", "updates" ,600,600, "Number of updates")
 				}
 		}
 		else if (dimension == "levels"){
 				if (filter.length == 0){
 					clean_graphs()
-					generate_chart(chart1, all_data, "#chart-distro13", "levels" ,600,600)
+					generate_chart(chart1, all_data, "#chart-distro13", "levels" ,600,600, "Levels")
 				}
 				else if (filter.length > 0){
 					filtered_data = filter_data(all_data, filter)
 					clean_graphs()
-					generate_chart(chart1, filtered_data, "#chart-distro13", "levels" ,600,600)
+					generate_chart(chart1, filtered_data, "#chart-distro13", "levels" ,600,600, "Levels")
 				}
 		}
 		else if (dimension == "ave_reward"){
 				if (filter.length == 0){
 					clean_graphs()
-					generate_chart(chart1, all_data, "#chart-distro13", "ave_reward" ,600,600)
+					generate_chart(chart1, all_data, "#chart-distro13", "ave_reward" ,600,600, "Average reward")
 				}
 				else if (filter.length > 0){
 					filtered_data = filter_data(all_data, filter)
 					clean_graphs()
-					generate_chart(chart1, filtered_data, "#chart-distro13", "ave_reward" ,600,600)
+
+					generate_chart(chart1, filtered_data, "#chart-distro13", "ave_reward" ,600,600, "Average reward")
 				}
 		}
 		else if (dimension == "title_length"){
 				if (filter.length == 0){
 					clean_graphs()
-					generate_chart(chart1, all_data, "#chart-distro13", "title_length" ,600,600)
+					generate_chart(chart1, all_data, "#chart-distro13", "title_length" ,600,600, "Title Length")
 				}
 				else if (filter.length > 0){
 					filtered_data = filter_data(all_data, filter)
 					clean_graphs()
-					generate_chart(chart1, filtered_data, "#chart-distro13", "title_length",600,600 )
+					generate_chart(chart1, filtered_data, "#chart-distro13", "title_length",600,600 , "Title Length")
 				}
 		}
 		else if (dimension == "duration"){
 				if (filter.length == 0){
 					clean_graphs()
-					generate_chart(chart1, all_data, "#chart-distro13", "duration",600,600 )
+					generate_chart(chart1, all_data, "#chart-distro13", "duration",600,600, "Duration in days" )
 				}
 				else if (filter.length > 0){
 					filtered_data = filter_data(all_data, filter)
 					clean_graphs()
-					generate_chart(chart1, filtered_data, "#chart-distro13", "duration",600,600 )
+					generate_chart(chart1, filtered_data, "#chart-distro13", "duration",600,600, "Duration in days" )
 				}
 		}
 	}
+function filter_state2(state) {
+		g_state = state
 
-	var g_state = ""
+	
+
+		button = document.getElementById('dropdownMenuButton');
+		gstate = g_state
+		if (g_state == ""){
+			gstate = "All"
+		}
+
+		button.innerHTML = gstate
+		mydim = dimension
+
+		filter_dimension(mydim)
+	}
+
+	
 	function filter_state(state) {
 		g_state = state
-		filter_dimension(dimension)
+
+	
+
+		button = document.getElementById('dropdownMenuButton');
+		gstate = g_state
+		if (g_state == ""){
+			gstate = "All"
+		}
+
+		button.innerHTML = gstate
+		mydim = dimension
+		if (dimension == "all"){
+			mydim = "goal"
+
+		}
+		filter_dimension(mydim)
 	}
 
 	window.addEventListener('message', function(e) {
@@ -566,6 +651,7 @@ slider2.oninput = function() {
 					.datum(d.parent)
 					.on("click", transition)
 				.select("text")
+				.style("font-size", "11px")
 					.text(name(d));
 
 			var g1 = svg.insert("g", ".grandparent")
@@ -590,6 +676,7 @@ slider2.oninput = function() {
 				.append("title")
 					.text(function(d) { return d.key + " (" + formatNumber(d.value) + ")"; });
 			children.append("text")
+			.style("font-size", "0px")
 					.attr("class", "ctext")
 					.text(function(d) { return d.key; })
 					.call(text2);
@@ -599,6 +686,7 @@ slider2.oninput = function() {
 					.call(rect);
 
 			var t = g.append("text")
+			.style("font-size", "10px")
 					.attr("class", "ptext")
 					.attr("dy", ".75em")
 
@@ -724,12 +812,25 @@ slider2.oninput = function() {
 	var chart5;
 	var chart6;
 
-	function generate_chart(chart1, data, selector, param, h, w) {
+	function generate_chart(chart1, data, selector, param, h, w, myName) {
+
+
+
+		mydata = []
+				console.log(data[0]["year launched"])
+			for (var i = 0; i < data.length; i++){
+
+				if (g_year_min <= parseInt(data[i]["year launched"]) && g_year_max >= parseInt(data[i]["year launched"])){
+					mydata.push(data[i])
+				}
+			}
+
+
 				chart1 = makeDistroChart({
-						data:data,
+						data:mydata,
 						xName:'status',
 						yName: param,
-						axisLabels: {xAxis: null, yAxis: param},
+						axisLabels: {xAxis: null, yAxis: myName},
 						selector: selector,
 						chartSize:{height:h, width:w},
 						constrainExtremes:true});
@@ -763,6 +864,8 @@ slider2.oninput = function() {
 				return data
 			}
 		}
+
+		filtered_data[0]["status"] = "successful"
 		return filtered_data
 	}
 
@@ -773,16 +876,16 @@ slider2.oninput = function() {
 
 				//console.log()
 
-				chart1 = generate_chart(chart1, data, "#chart-distro1", "goal", 400, 600)
+
+				chart1 = generate_chart(chart1, data, "#chart-distro1", "goal", 400, 600, "Goal in dollars")
 
 				
 
-				generate_chart(chart2, data, "#chart-distro2", "updates" , 400, 600)
-				generate_chart(chart3, data, "#chart-distro3", "levels" , 400, 600)
-				generate_chart(chart4, data, "#chart-distro4", "title_length" , 400, 600)
-				generate_chart(chart5, data, "#chart-distro5", "duration" , 400, 600)
-				generate_chart(chart6, data, "#chart-distro6", "ave_reward" , 400, 600)
-
+				generate_chart(chart2, data, "#chart-distro2", "updates" , 400, 600, "Number of updates")
+				generate_chart(chart3, data, "#chart-distro3", "levels" , 400, 600, "Levels" )
+				generate_chart(chart4, data, "#chart-distro5", "title_length" , 400, 600, "Title Length")
+				generate_chart(chart5, data, "#chart-distro6", "duration" , 400, 600, "Duration in days")
+				generate_chart(chart6, data, "#chart-distro4", "ave_reward" , 400, 600, "Average reward" )
 
 		});
 
@@ -830,8 +933,16 @@ function filter_sub(data, category, state, sub) {
 
 					}
 					data.splice(mark,1)
+					tempsuccess = mystruct["success"]
+					tempfail = mystruct["failed"]
+					temptotal = tempsuccess+tempfail
+					mystruct["success"] = (tempsuccess/temptotal)*100
+					mystruct["failed"] = (tempfail/temptotal)*100
 					temp.push(mystruct)
+
+
 				}
+
 				show_sub(temp)
 			}
 
@@ -856,6 +967,11 @@ function filter_sub(data, category, state, sub) {
 				}
 				mystruct["success"] = tot_success
 				mystruct["failed"] = tot_failed
+					tempsuccess = mystruct["success"]
+					tempfail = mystruct["failed"]
+					temptotal = tempsuccess+tempfail
+					mystruct["success"] = (tempsuccess/temptotal)*100
+					mystruct["failed"] = (tempfail/temptotal)*100
 				temp.push(mystruct)
 				show_sub(temp)
 			}
@@ -883,6 +999,11 @@ function filter_sub(data, category, state, sub) {
 
 					}
 					data.splice(mark,1)
+					tempsuccess = mystruct["success"]
+					tempfail = mystruct["failed"]
+					temptotal = tempsuccess+tempfail
+					mystruct["success"] = (tempsuccess/temptotal)*100
+					mystruct["failed"] = (tempfail/temptotal)*100
 					temp.push(mystruct)
 				}
 				show_sub(temp)
@@ -934,8 +1055,23 @@ function filter_sub(data, category, state, sub) {
 
 					}
 					temp2.splice(mark,1)
+					tempsuccess = mystruct["success"]
+					tempfail = mystruct["failed"]
+					temptotal = tempsuccess+tempfail
+					mystruct["success"] = (tempsuccess/temptotal)*100
+					mystruct["failed"] = (tempfail/temptotal)*100
 					temp.push(mystruct)
 				}
+
+temp.sort(function (vote1, vote2) {
+
+	// Sort by votes
+	// If the first item has a higher number, move it down
+	// If the first item has a lower number, move it up
+	if (vote1.success > vote2.success) return -1;
+	if (vote1.success < vote2.success) return 1;
+
+});
 
 	    		show_state(temp)
 			}
@@ -988,8 +1124,22 @@ function filter_sub(data, category, state, sub) {
 
 					}
 					temp2.splice(mark,1)
+					tempsuccess = mystruct["success"]
+					tempfail = mystruct["failed"]
+					temptotal = tempsuccess+tempfail
+					mystruct["success"] = (tempsuccess/temptotal)*100
+					mystruct["failed"] = (tempfail/temptotal)*100
 					temp.push(mystruct)
 				}
+temp.sort(function (vote1, vote2) {
+
+	// Sort by votes
+	// If the first item has a higher number, move it down
+	// If the first item has a lower number, move it up
+	if (vote1.success > vote2.success) return -1;
+	if (vote1.success < vote2.success) return 1;
+
+});
 
 	    		show_cat(temp)
 			}
@@ -1042,8 +1192,22 @@ function filter_sub(data, category, state, sub) {
 
 					}
 					temp2.splice(mark,1)
+					tempsuccess = mystruct["success"]
+					tempfail = mystruct["failed"]
+					temptotal = tempsuccess+tempfail
+					mystruct["success"] = (tempsuccess/temptotal)*100
+					mystruct["failed"] = (tempfail/temptotal)*100
 					temp.push(mystruct)
 				}
+temp.sort(function (vote1, vote2) {
+
+	// Sort by votes
+	// If the first item has a higher number, move it down
+	// If the first item has a lower number, move it up
+	if (vote1.success > vote2.success) return -1;
+	if (vote1.success < vote2.success) return 1;
+
+});
 
 	    		show_state(temp)
 			}
@@ -1119,22 +1283,12 @@ var layer = svg.selectAll(".stack")
   .enter().append("g")
   .attr("class", "stack")
   .style("fill", function(d, i) {
+  	if (i == 1){ return "#66ccff";}
+  	else {return "#074080";}
     return color(i);
   });
 
-layer.selectAll("foo")
-  .data(function(d) {
-    return d;
-  })
-  .enter().append("text")
-  .attr("x", function(d) {
-    return x(d.x) + x.rangeBand() + 4;
-  })
-  .attr("y", function(d) {
-    return (y(d.y + d.y0) + y(d.y0)) / 2;
-  })
-  .text(d => format(d.y / sum))
-  .style("font-size", "10px")
+
 
 
 layer.selectAll("rect")
@@ -1157,6 +1311,23 @@ svg.append("g")
   .attr("class", "axis")
   .attr("transform", "translate(0," + height + ")")
   .call(xAxis);
+
+layer.selectAll("foo")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("text")
+  .attr("x", function(d) {
+    return x(d.x) + 4;
+  })
+  .attr("y", function(d) {
+    return (y(d.y + d.y0) + y(d.y0)) / 2;
+  })
+  .text(d => format(d.y / sum))
+  .style("font-size", "15px")
+  .style("fill", "white")
+
+
 }
 
 function show_cat(data){
@@ -1228,22 +1399,10 @@ var layer = svg.selectAll(".stack")
   .enter().append("g")
   .attr("class", "stack")
   .style("fill", function(d, i) {
+  	  	if (i == 1){ return "#66ccff";}
+  	else {return "#074080";}
     return color(i);
   });
-
-layer.selectAll("foo")
-  .data(function(d) {
-    return d;
-  })
-  .enter().append("text")
-  .attr("x", function(d) {
-    return x(d.x) + x.rangeBand() + 4;
-  })
-  .attr("y", function(d) {
-    return (y(d.y + d.y0) + y(d.y0)) / 2;
-  })
-  .text(d => format(d.y / sum))
-  .style("font-size", "10px")
 
 
 layer.selectAll("rect")
@@ -1266,6 +1425,23 @@ svg.append("g")
   .attr("class", "axis")
   .attr("transform", "translate(0," + height + ")")
   .call(xAxis);
+
+layer.selectAll("foo")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("text")
+  .attr("x", function(d) {
+    return x(d.x) + 4;
+  })
+  .attr("y", function(d) {
+    return (y(d.y + d.y0) + y(d.y0)) / 2;
+  })
+  .text(d => format(d.y / sum))
+  .style("font-size", "15px")
+  .style("fill", "white")
+
+
 }
 function show_sub(data){
 
@@ -1337,22 +1513,10 @@ var layer = svg.selectAll(".stack")
   .enter().append("g")
   .attr("class", "stack")
   .style("fill", function(d, i) {
+  	  	if (i == 1){ return "#66ccff";}
+  	else {return "#074080";}
     return color(i);
   });
-
-layer.selectAll("foo")
-  .data(function(d) {
-    return d;
-  })
-  .enter().append("text")
-  .attr("x", function(d) {
-    return x(d.x) + x.rangeBand() + 4;
-  })
-  .attr("y", function(d) {
-    return (y(d.y + d.y0) + y(d.y0)) / 2;
-  })
-  .text(d => format(d.y / sum))
-  .style("font-size", "10px")
 
 
 layer.selectAll("rect")
@@ -1375,6 +1539,23 @@ svg.append("g")
   .attr("class", "axis")
   .attr("transform", "translate(0," + height + ")")
   .call(xAxis);
+
+layer.selectAll("foo")
+  .data(function(d) {
+    return d;
+  })
+  .enter().append("text")
+  .attr("x", function(d) {
+    return x(d.x) + 4;
+  })
+  .attr("y", function(d) {
+    return (y(d.y + d.y0) + y(d.y0)) / 2;
+  })
+  .text(d => format(d.y / sum))
+  .style("font-size", "15px")
+  .style("fill", "white")
+
+
 }
 
 
